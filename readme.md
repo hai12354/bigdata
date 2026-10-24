@@ -45,9 +45,7 @@ flowchart LR
 
     subgraph Presentation [Trực Quan Hóa]
         Streamlit["Streamlit Dashboard<br/>(app/app.py - Port: 8501)"]
-        CheckDB["check_db.py<br/>(Kiểm tra CLI)"]
         Postgres --> Streamlit
-        Postgres -.-> CheckDB
     end
 ```
 
