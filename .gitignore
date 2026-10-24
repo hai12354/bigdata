@@ -1,0 +1,18 @@
+# Quản lý môi trường & Bảo mật Key
+.env
+*.pyc
+__pycache__/
+.venv/
+env/
+venv/
+
+# Thư mục Checkpoints và tạm thời của Spark/Airflow
+checkpoints/
+logs/
+*.log
+
+# Cấu hình IDE / Hệ thống
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

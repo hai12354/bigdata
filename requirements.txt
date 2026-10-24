@@ -1,0 +1,23 @@
+# Kết nối Kafka & cào dữ liệu API
+kafka-python==2.0.2
+requests==2.31.0
+urllib3==2.1.0
+
+# PySpark & Xử lý dữ liệu
+pyspark==3.3.0
+pandas==2.1.4
+
+# Kết nối cơ sở dữ liệu PostgreSQL
+psycopg2-binary==2.9.9
+sqlalchemy==2.0.25
+
+# Tích hợp AI APIs (Groq & Gemini)
+groq==0.4.2
+google-generativeai==0.3.2
+
+# Đọc biến môi trường từ file .env
+python-dotenv==1.0.0
+
+# Giao diện Streamlit Dashboard & Đồ họa
+streamlit==1.31.0
+plotly==5.18.0
