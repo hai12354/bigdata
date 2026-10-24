@@ -205,8 +205,10 @@ docker-compose down
 2. Xóa thư mục checkpoint của Spark:
    ```bash
    # Trên PowerShell
+
    Remove-Item -Recurse -Force checkpoints\news_analytics
-   ```
+   cmd
+   rmdir /s /q checkpoints\news_analytics ```
 
 ---
 

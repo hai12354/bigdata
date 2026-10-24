@@ -9,10 +9,10 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
 
-  # 2. Apache Kafka
-  kafka:
+  # 2. Kafka Broker 1
+  kafka1:
     image: confluentinc/cp-kafka:7.3.0
-    container_name: kafka
+    container_name: kafka1
     depends_on:
       - zookeeper
     ports:
@@ -20,24 +20,55 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
-  # 3. UI for Apache Kafka
+  # 3. Kafka Broker 2
+  kafka2:
+    image: confluentinc/cp-kafka:7.3.0
+    container_name: kafka2
+    depends_on:
+      - zookeeper
+    ports:
+      - "9093:9093"
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:29093,PLAINTEXT_HOST://localhost:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+
+  # 4. Kafka Broker 3
+  kafka3:
+    image: confluentinc/cp-kafka:7.3.0
+    container_name: kafka3
+    depends_on:
+      - zookeeper
+    ports:
+      - "9094:9094"
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:29094,PLAINTEXT_HOST://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+
+  # 5. UI for Apache Kafka (Quản lý Cluster 3 Brokers)
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
     depends_on:
-      - kafka
+      - kafka1
+      - kafka2
+      - kafka3
     ports:
       - "8090:8080"
     environment:
-      KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_NAME: bigdata-cluster-3nodes
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka1:29092,kafka2:29093,kafka3:29094
 
-  # 4. PostgreSQL Database
+  # 6. PostgreSQL Database
   postgres:
     image: postgres:15
     container_name: postgres
@@ -48,13 +79,13 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgrespassword
 
-  # 5. Airflow Webserver (Giao diện Web)
+  # 7. Airflow Webserver & Scheduler
   airflow-webserver:
     image: apache/airflow:2.7.1-python3.10
     container_name: airflow
     restart: always
     depends_on:
-      - kafka
+      - kafka1
       - postgres
     environment:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
@@ -72,7 +103,6 @@ services:
                airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com || true &&
                exec airflow webserver"
 
-  # 6. Airflow Scheduler (Chuyên phụ trách thực thi Task khi bấm Trigger)
   airflow-scheduler:
     image: apache/airflow:2.7.1-python3.10
     container_name: airflow-scheduler
@@ -89,4 +119,4 @@ services:
       - ./scripts:/opt/airflow/scripts
     command: >
       bash -c "pip install --no-cache-dir kafka-python requests urllib3 &&
-               exec airflow scheduler"  
+               exec airflow scheduler"

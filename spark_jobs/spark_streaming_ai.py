@@ -135,7 +135,7 @@ json_schema = StructType([
 
 kafka_raw_df = spark.readStream \
     .format("kafka") \
-    .option("kafka.bootstrap.servers", "localhost:9092") \
+    .option("kafka.bootstrap.servers", "localhost:9092,localhost:9093,localhost:9094") \
     .option("subscribe", "bigdata_topic") \
     .option("startingOffsets", "latest") \
     .option("maxOffsetsPerTrigger", 2) \
@@ -175,7 +175,7 @@ checkpoint_path = r"D:\bigData\checkpoints\news_analytics"
 
 query = enriched_df.writeStream \
     .option("checkpointLocation", checkpoint_path) \
-    .trigger(processingTime='2 seconds') \
+    .trigger(processingTime='3 seconds') \
     .foreachBatch(write_to_postgres) \
     .outputMode("append") \
     .start()

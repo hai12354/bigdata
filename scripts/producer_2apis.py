@@ -42,23 +42,33 @@ def produce_single_message(producer):
     print(f"[KAFKA SUCCESS] {time.strftime('%H:%M:%S')} | Author: {author}")
 
 def run_producer(continuous=True, max_messages=1):
-    # Tự động nhận diện host Kafka (trong Docker hay ngoài máy thật)
-    try:
-        producer = KafkaProducer(
-            bootstrap_servers=['kafka:29092'],
-            value_serializer=lambda v: json.dumps(v).encode('utf-8'),
-            acks=1,
-            retries=2
-        )
-    except Exception:
-        producer = KafkaProducer(
-            bootstrap_servers=['localhost:9092'],
-            value_serializer=lambda v: json.dumps(v).encode('utf-8'),
-            acks=1,
-            retries=2
-        )
+    # Khởi tạo danh sách tất cả các Host Kafka có thể kết nối
+    bootstrap_list = [
+        'kafka1:29092', 'kafka2:29093', 'kafka3:29094',  # Tên host nội bộ Docker
+        'kafka:29092',                                   # Fallback cho container 1 broker
+        'localhost:9092', 'localhost:9093', 'localhost:9094' # Cho máy thật Windows
+    ]
     
-    SLEEP_TIME = 2
+    producer = None
+    for host in bootstrap_list:
+        try:
+            producer = KafkaProducer(
+                bootstrap_servers=[host],
+                value_serializer=lambda v: json.dumps(v, ensure_ascii=False).encode('utf-8'),
+                acks=1,
+                retries=2,
+                request_timeout_ms=3000
+            )
+            print(f"[PRODUCER KẾT NỐI THÀNH CÔNG THÔNG QUA]: {host}")
+            break
+        except Exception:
+            continue
+
+    if not producer:
+        print("[PRODUCER LỖI] Không thể kết nối tới bất kỳ Kafka Broker nào!")
+        return
+    
+    SLEEP_TIME = 3 # Thời gian nghỉ giữa các lần gửi message, tránh spam quá nhanh
     print(f"[PRODUCER START] Đang đẩy dữ liệu lên Kafka...")
     
     if continuous:

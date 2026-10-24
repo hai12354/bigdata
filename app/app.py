@@ -39,7 +39,7 @@ st.caption("⚡ Dữ liệu real-time từ Kafka -> PySpark Streaming -> Postgre
 st.markdown("---")
 
 # Tần suất tự động làm mới 2 giây
-@st.fragment(run_every=2)
+@st.fragment(run_every=1)
 def render_dashboard():
     df = load_data()
     current_time = time.strftime("%H:%M:%S")
